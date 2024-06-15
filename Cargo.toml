@@ -1,5 +1,5 @@
 [package]
-name = "autobright-rs"
+name = "fr13-autobright-rs"
 version = "0.1.0"
 edition = "2021"
 
