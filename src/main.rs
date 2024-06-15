@@ -127,8 +127,12 @@ fn get_files() -> Result<(File, File, u32), MyError> {
     Ok((br.unwrap(), sen.unwrap(), max_br.unwrap()))
 }
 
-fn compute_br(csen: u32, _conf: &Conf, max_br: u32) -> u32 {
+fn compute_br(mut csen: u32, _conf: &Conf, max_br: u32) -> u32 {
     // let new = lerp(csen, 0, _conf.max_lum, 0, max_br);
+    if csen < 1 {
+        csen = 1
+    };
+    assert!(csen > 0);
     let new = lerp(csen.ilog(2), 0, 10, 0, max_br);
     // for x in [2, 3, 4, 5, 6] {
     //     println!("{}", (csen as f32).log(x as f32));
@@ -158,9 +162,11 @@ fn main() -> Result<(), MyError> {
             prev = new;
         }
 
-        print!("  br:  {:4}", _cbr);
-        print!("  sen: {:4}", csen);
-        print!("  new: {:4}", new);
-        print!("\n");
+        //     print!(" br:  {:4}", _cbr);
+        //     print!(" sen: {:4}", csen);
+        //     print!(" prev: {:4}", prev);
+        //     print!(" new: {:4}", new);
+        //     print!(" t: {:4}", new as u8 + prev as u8);
+        //     print!("\n");
     }
 }
