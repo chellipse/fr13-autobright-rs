@@ -1,6 +1,6 @@
 use std::{
     env,
-    fs::{self, File},
+    fs::File,
     io::{self, Read, Seek, SeekFrom, Write},
     num::ParseIntError,
     thread::sleep,
@@ -49,7 +49,7 @@ fn get_num(mut fd: &File) -> Result<u32, MyError> {
     if !s.is_empty() {
         Ok(s.parse::<u32>()?)
     } else {
-        Ok(0)
+        Ok(1)
     }
 }
 
@@ -127,7 +127,14 @@ fn get_files() -> Result<(File, File, u32), MyError> {
     Ok((br.unwrap(), sen.unwrap(), max_br.unwrap()))
 }
 
-const DELAY: Duration = Duration::from_millis(980);
+fn compute_br(csen: u32, _conf: &Conf, max_br: u32) -> u32 {
+    // let new = lerp(csen, 0, _conf.max_lum, 0, max_br);
+    let new = lerp(csen.ilog(2), 0, 10, 0, max_br);
+    // for x in [2, 3, 4, 5, 6] {
+    //     println!("{}", (csen as f32).log(x as f32));
+    // }
+    new
+}
 
 fn main() -> Result<(), MyError> {
     let conf = get_conf();
@@ -137,26 +144,21 @@ fn main() -> Result<(), MyError> {
     let mut prev = 0;
 
     loop {
+        const DELAY: Duration = Duration::from_millis(980);
         sleep(DELAY);
 
-        let cbr = match get_num(&br) {
-            Ok(n) => n,
-            Err(_) => continue,
-        };
-        let csen = match get_num(&sen) {
-            Ok(n) => n,
-            Err(_) => continue,
-        };
+        let Ok(_cbr) = get_num(&br) else { continue };
+        let Ok(csen) = get_num(&sen) else { continue };
 
         // dbg!(csen, 0, conf.max_lum, 0, max_br);
-        let new = lerp(csen, 0, conf.max_lum, 0, max_br);
+        let new = compute_br(csen, &conf, max_br);
 
         if new != prev {
             write_num(&br, new)?;
             prev = new;
         }
 
-        print!("  br:  {:4}", cbr);
+        print!("  br:  {:4}", _cbr);
         print!("  sen: {:4}", csen);
         print!("  new: {:4}", new);
         print!("\n");
